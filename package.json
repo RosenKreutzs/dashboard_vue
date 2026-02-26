@@ -1,7 +1,7 @@
 {
-  "name": "dashboard_vue",
-  "version": "0.0.0",
+  "name": "cpu-app",
   "private": true,
+  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,15 +9,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "echarts": "^6.0.0",
-    "vue": "^3.5.27"
+    "@jiaminghi/data-view": "^2.10.0",
+    "@vueuse/core": "^14.2.1",
+    "echarts": "^5.5.0",
+    "echarts-gl": "^2.0.9",
+    "markdown-it": "^14.1.1",
+    "pinia": "^3.0.4",
+    "three": "^0.182.0",
+    "vue": "^3.5.25",
+    "vue-router": "^4.6.4"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^6.0.3",
+    "@vitejs/plugin-vue": "^6.0.2",
     "vite": "^7.3.1",
-    "vite-plugin-vue-devtools": "^8.0.5"
-  },
-  "engines": {
-    "node": "^20.19.0 || >=22.12.0"
+    "vite-plugin-singlefile": "^2.3.0"
   }
 }
