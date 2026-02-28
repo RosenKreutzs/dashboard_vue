@@ -194,7 +194,7 @@ onMounted(async () => {
         
         <div class="exp-tags">
           <span class="tag attacker">🎯 {{ vuln.id }}</span>
-          <span class="tag victim">🛡️ {{ vuln.telephoneNumber }}</span>
+          <span class="tag victim">📞 {{ vuln.telephoneNumber }}</span>
         </div>
         
         <p class="exp-desc">{{ vuln.selfDescription }}</p>

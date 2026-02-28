@@ -220,29 +220,29 @@ onUnmounted(() => {
         </div>
         <div class="overview-stats">
           <div class="stat-item">
-            <div class="stat-value">{{ animatedStats.temperature }}</div>
-            <div class="stat-label">平均温度</div>
-            <div class="stat-change">↑ {{ animatedStats.averageTemperature }}%</div>
+            <div class="stat-value">{{ animatedStats.temperature }} °C</div>
+            <div class="stat-label">温度</div>
+            <div class="stat-change">{{ animatedStats.averageTemperature }} 平均温度</div>
           </div>
           <div class="stat-item">
-            <div class="stat-value">{{ animatedStats.humidity }}</div>
-            <div class="stat-label">平均湿度</div>
-            <div class="stat-change">{{ animatedStats.humidityChange }}%</div>
+            <div class="stat-value">{{ animatedStats.humidity }} %RH</div>
+            <div class="stat-label">湿度</div>
+            <div class="stat-change">{{ animatedStats.humidityChange }}% 湿度变化</div>
           </div>
           <div class="stat-item">
             <div class="stat-value">{{ animatedStats.aqi }}</div>
             <div class="stat-label">空气质量指数</div>
-            <div class="stat-change">+{{ animatedStats.aqiChange }} 本周新增</div>
+            <div class="stat-change">{{ animatedStats.aqiChange }} 空气质量指数变化</div>
           </div>
           <div class="stat-item">
-            <div class="stat-value">{{ animatedStats.visibility }}</div>
+            <div class="stat-value">{{ animatedStats.visibility }} m</div>
             <div class="stat-label">能见度</div>
-            <div class="stat-change">{{ animatedStats.visibilityChange }}%</div>
+            <div class="stat-change">{{ animatedStats.visibilityChange }}% 能见度变化</div>
           </div>
           <div class="stat-item">
-            <div class="stat-value">{{ animatedStats.pressure }}%</div>
+            <div class="stat-value">{{ animatedStats.pressure }} Pa</div>
             <div class="stat-label">大气压强</div>
-            <div class="stat-change">{{ animatedStats.pressureChange }}%</div>
+            <div class="stat-change">{{ animatedStats.pressureChange }}% 大气压强变化</div>
           </div>
         </div>
       </div>

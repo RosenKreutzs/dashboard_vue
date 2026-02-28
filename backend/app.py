@@ -2,6 +2,7 @@ import json
 import os
 import hashlib
 import uuid
+import requests  # 新增：用于调用 API
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
@@ -11,6 +12,14 @@ CORS(app)
 # 定义数据库路径
 DB_PATH = '../database/'
 ACCOUNTS_FILE = os.path.join(DB_PATH, 'accounts.json')
+
+# --- 配置区 ---
+# 你需要去 https://openweathermap.org/ 注册并获取免费的 API_KEY
+WEATHER_API_KEY = "069c16314daa224a76672e580ab41c5e"
+# 设置为重庆
+CITY_NAME = "Chongqing,CN"
+# ----------------
+# --------------
 
 # 确保数据库目录和账户文件存在
 if not os.path.exists(DB_PATH):
@@ -37,6 +46,60 @@ def write_json(filename, data):
 # 辅助函数：密码加密
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
+
+def get_real_weather_stats():
+    """从第三方 API 获取真实天气并转换格式"""
+    # 默认模拟数据（作为兜底）
+    fallback_stats = {
+        "temperature": 15, "humidity": 45, "humidityChange": 2.1,
+        "aqi": 42, "aqiChange": -1.2, "visibility": 10.0, "visibilityChange": 0.5,
+        "pressure": 1012, "pressureChange": 0.1, "averageTemperature": 14,
+        "maximumTemperature": [12, 15, 13, 18, 22, 20, 25],
+        "minimumTemperature": [8, 10, 9, 12, 14, 13, 16],
+    }
+
+    try:
+        # 1. 获取当前天气 (Current Weather)
+        curr_url = f"https://api.openweathermap.org/data/2.5/weather?q={CITY_NAME}&appid={WEATHER_API_KEY}&units=metric"
+        curr_res = requests.get(curr_url, timeout=5).json()
+        print(f"DEBUG API Response: {curr_res}") #
+
+        # 2. 获取空气质量 (Air Pollution)
+        lat, lon = curr_res['coord']['lat'], curr_res['coord']['lon']
+        aqi_url = f"https://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={WEATHER_API_KEY}"
+        aqi_res = requests.get(aqi_url, timeout=5).json()
+
+        # 3. 获取预报 (Forecast - 免费版通常提供5天/3小时数据，我们提取每日极值)
+        fore_url = f"https://api.openweathermap.org/data/2.5/forecast?q={CITY_NAME}&appid={WEATHER_API_KEY}&units=metric"
+        fore_res = requests.get(fore_url, timeout=5).json()
+
+        # 数据清洗与转换
+        max_temps = []
+        min_temps = []
+        # 提取每日最高/最低温（简单处理：每8个点代表一天）
+        for i in range(0, len(fore_res['list']), 8):
+            day_data = fore_res['list'][i:i+8]
+            max_temps.append(int(max(item['main']['temp_max'] for item in day_data)))
+            min_temps.append(int(min(item['main']['temp_min'] for item in day_data)))
+        real_stats = {
+            "temperature": int(curr_res['main']['temp']),
+            "humidity": curr_res['main']['humidity'],
+            "humidityChange": 1.5, # 变化率通常需要历史数据计算，这里暂给固定值
+            "aqi": aqi_res['list'][0]['main']['aqi'] * 20, # 转换成常见的 0-200 指数
+            "aqiChange": 0.5,
+            "visibility": round(curr_res.get('visibility', 10000) / 1000, 1), # 米转公里
+            "visibilityChange": 0.2,
+            "pressure": curr_res['main']['pressure'],
+            "pressureChange": -0.1,
+            "averageTemperature": int(sum(max_temps) / len(max_temps)) if max_temps else 15,
+            "maximumTemperature": max_temps[:7], # 确保返回7天数据
+            "minimumTemperature": min_temps[:7],
+        }
+        return real_stats
+
+    except Exception as e:
+        print(f"[!] 无法获取真实天气: {e}，将使用模拟数据。")
+        return fallback_stats
 
 # --- 路由开始 ---
 
@@ -93,20 +156,7 @@ def login():
 @app.route('/api/dashboard', methods=['GET'])
 def get_dashboard():
     # 模拟天气数据
-    stats = {
-        "temperature": 11,
-        "humidity": 2,
-        "humidityChange": 8.3,
-        "aqi": 3.6,
-        "aqiChange": 2.5,
-        "visibility": 2.1,
-        "visibilityChange": 15.2,
-        "pressure": 2.3,
-        "pressureChange": 2.1,
-        "averageTemperature": 12,
-        "maximumTemperature": [12, 15, 13, 18, 22, 20, 25],
-        "minimumTemperature": [8, 10, 9, 12, 14, 13, 16],
-    }
+    stats = get_real_weather_stats()
 
     data = {
         'stats': stats,
