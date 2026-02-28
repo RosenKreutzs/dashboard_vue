@@ -1,66 +1,135 @@
 import json
-
-from flask import Flask, request, jsonify, send_file
-from flask_cors import CORS
 import os
-import tempfile
-import time
+import hashlib
+import uuid
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 
-app = Flask(__name__)#初始化 Flask 实例，它是后端的主体
-CORS(app)# 允许跨域请求，方便前端（如 Vue/React）调用;(默认情况下，浏览器禁止一个域名的前端访问另一个域名的后端（同源策略）。开启 CORS 后，你的 Vue 或 React 前端才能跨域向这个 Flask 后端发送 API 请求。)
+app = Flask(__name__)
+CORS(app)
 
+# 定义数据库路径
+DB_PATH = '../database/'
+ACCOUNTS_FILE = os.path.join(DB_PATH, 'accounts.json')
 
+# 确保数据库目录和账户文件存在
+if not os.path.exists(DB_PATH):
+    os.makedirs(DB_PATH)
+
+if not os.path.exists(ACCOUNTS_FILE):
+    with open(ACCOUNTS_FILE, 'w', encoding='utf-8') as f:
+        json.dump([], f)
+
+# 辅助函数：读取 JSON
+def read_json(filename):
+    full_path = os.path.join(DB_PATH, filename)
+    if not os.path.exists(full_path):
+        return []
+    with open(full_path, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+# 辅助函数：写入 JSON
+def write_json(filename, data):
+    full_path = os.path.join(DB_PATH, filename)
+    with open(full_path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+
+# 辅助函数：密码加密
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+# --- 路由开始 ---
+
+@app.route('/api/register', methods=['POST'])
+def register():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    email = data.get('email', '')
+
+    if not username or not password:
+        return jsonify({'message': '用户名和密码不能为空'}), 400
+
+    accounts = read_json('accounts.json')
+    print(accounts)
+    # 检查用户是否已存在
+    if any(acc['username'] == username for acc in accounts):
+        return jsonify({'message': '该用户已存在，请直接登录'}), 400
+
+    # 录入新用户
+    new_user = {
+        'id': str(uuid.uuid4())[:8],
+        'username': username,
+        'password': hash_password(password),
+        'email': email
+    }
+    accounts.append(new_user)
+    write_json('accounts.json', accounts)
+
+    return jsonify({'message': '身份信息录入成功'})
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    accounts = read_json('accounts.json')
+    hashed_pwd = hash_password(password)
+    # 验证凭据
+    user = next((acc for acc in accounts if acc['username'] == username and acc['password'] == hashed_pwd), None)
+    if user:
+        # 模拟生成一个访问 Token
+        token = f"neural-core-auth-{uuid.uuid4().hex}"
+        authId = user.get('id')
+        return jsonify({
+            'message': '认证通过',
+            'token': token,
+            'username': username,
+            'authId':authId
+        })
+    else:
+        return jsonify({'message': '凭证不匹配，拒绝访问'}), 401
 
 @app.route('/api/dashboard', methods=['GET'])
 def get_dashboard():
-    # 这里模拟返回你之前 JS 里的数据结构
+    # 模拟天气数据
     stats = {
-        "temperature":11,
-        "humidity":2,
-        "humidityChange":8.3,
-        "aqi":3.6,
-        "aqiChange":2.5,
-        "visibility":2.1,
-        "visibilityChange":15.2,
-        "pressure":2.3,
-        "pressureChange":2.1,
-        "averageTemperature":12,
-        "maximumTemperature":[12, 15, 13, 18, 22, 20, 25],
-        "minimumTemperature":[8, 10, 9, 12, 14, 13, 16],
+        "temperature": 11,
+        "humidity": 2,
+        "humidityChange": 8.3,
+        "aqi": 3.6,
+        "aqiChange": 2.5,
+        "visibility": 2.1,
+        "visibilityChange": 15.2,
+        "pressure": 2.3,
+        "pressureChange": 2.1,
+        "averageTemperature": 12,
+        "maximumTemperature": [12, 15, 13, 18, 22, 20, 25],
+        "minimumTemperature": [8, 10, 9, 12, 14, 13, 16],
     }
-    with open('../database/users.json', 'r', encoding='utf-8') as f:
-        users = json.load(f)
-    with open('../database/foods.json', 'r', encoding='utf-8') as f:
-        foods = json.load(f)
-    with open('../database/scoringList.json', 'r', encoding='utf-8') as f:
-        scoringList = json.load(f)
-    # 2. 合成过程：创建一个空字典并填充
-    data = {}
-    data['stats'] = stats
-    data['scoringList'] = scoringList
-    data['users'] = users
-    data['foods'] = foods
+
+    data = {
+        'stats': stats,
+        'scoringList': read_json('scoringList.json'),
+        'users': read_json('users.json'),
+        'foods': read_json('foods.json')
+    }
     return jsonify(data)
 
 @app.route('/api/users', methods=['GET'])
 def get_users_data():
-    with open('../database/users.json', 'r', encoding='utf-8') as f:
-        users = json.load(f)
-    return jsonify(users)
+    return jsonify(read_json('users.json'))
+
 @app.route('/api/workers', methods=['GET'])
 def get_workers_data():
-    with open('../database/workers.json', 'r', encoding='utf-8') as f:
-        workers = json.load(f)
-    return jsonify(workers)
+    return jsonify(read_json('workers.json'))
 
-@app.route('/api/health', methods=['GET'])# 定义路径为 /api/health，仅支持 GET 请求（浏览器直接访问即可）
-def health():#健康检查
-    # 返回一个简单的 JSON 对象，告知前端状态正常
-    # status: ok 表示服务存活，message 提供一条人类可读的消息
-    return jsonify({'status': 'ok', 'message': 'Server Running'})
+@app.route('/api/health', methods=['GET'])
+def health():
+    return jsonify({'status': 'ok', 'message': 'NeuralCore Server Running'})
 
-if __name__ == '__main__':# 只有直接运行这个 py 文件时才执行以下代码（如果被其他文件 import 则不执行）
-    # 在控制台（黑窗口）打印启动提示，方便开发者确认服务器状态
-    print("[*] Starting AI Vulnerability Analysis Server...")
+if __name__ == '__main__':
+    print("[*] Starting Smart Nursing Home Backend...")
+    print("[*] Accounts Database: " + ACCOUNTS_FILE)
     print("[*] Server running on http://localhost:5000")
-    app.run(host='0.0.0.0', port=5000, debug=True)# 调用 Flask 实例的 run 方法启动 Web 服务
+    app.run(host='0.0.0.0', port=5000, debug=True)
