@@ -2,10 +2,9 @@
 import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue'
 import * as echarts from 'echarts'
 import 'echarts-gl'
-import { useNursingStore } from '../../database/nursingStore'
 
-const nursingStore = useNursingStore()
-
+// 1. 定义一个响应式变量来存储后端传来的数据
+const serverData = ref(null)
 const animatedStats = reactive({
   temperature:0,
   humidity:0,
@@ -19,13 +18,8 @@ const animatedStats = reactive({
   averageTemperature:0,
 })// 存储天气相关的数值，初始全为 0
 
-const temperatureTrend = {
-  maximumTemperature:nursingStore.stats.maximumTemperature,
-  minimumTemperature:nursingStore.stats.minimumTemperature
-}// 固定的温度趋势数组
-
-const streamData = ref(nursingStore.scoringList)// 护工评分列表数据
-
+const streamData = ref([])// 护工评分列表数据
+const foods =ref([])
 const trendChartRef = ref(null)// 用于绑定折线图 DOM 元素的引用
 const pieChartRef = ref(null)// 用于绑定饼图 DOM 元素的引用
 let streamInterval = null// 滚动定时器变量
@@ -51,7 +45,7 @@ const animateNumber = (target, key, endValue, duration = 2000) => {
 }
 
 // 折线图配置
-const initTrendChart = () => {
+const initTrendChart = (stats) => {
   if (!trendChartRef.value) return
 
   const chart = echarts.init(trendChartRef.value)
@@ -88,7 +82,7 @@ const initTrendChart = () => {
         name: '最高温度',
         type: 'line',
         smooth: true,
-        data: temperatureTrend.maximumTemperature,
+        data: stats.maximumTemperature,
         itemStyle: { color: '#00d4ff' },
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -101,7 +95,7 @@ const initTrendChart = () => {
         name: '最低温度',
         type: 'line',
         smooth: true,
-        data: temperatureTrend.minimumTemperature,
+        data: stats.minimumTemperature,
         itemStyle: { color: '#00ff9d' },
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -117,13 +111,13 @@ const initTrendChart = () => {
   window.addEventListener('resize', () => chart.resize())
 }
 // 饼图配置
-const initPieChart = () => {
-  if (!pieChartRef.value) return
+const initPieChart = (users) => {
+  if (!pieChartRef.value || !users) return
 
   const chart = echarts.init(pieChartRef.value)
 
   const actionCapabilitys = {}
-  nursingStore.users.forEach(v => {
+  users.forEach(v => {
     actionCapabilitys[v.actionCapability] = (actionCapabilitys[v.actionCapability] || 0) + 1
   })
 
@@ -174,27 +168,39 @@ const initPieChart = () => {
   window.addEventListener('resize', () => chart.resize())
 }
 
-//生命周期钩子:这是整个脚本的“引擎开关”。(页面加载完成时)
-onMounted(() => {
-  //启动数字动画: 延迟 500ms 后将真实统计数据通过 animateNumber 动态跑起来。
-  setTimeout(() => {
-    animateNumber(animatedStats, 'temperature', nursingStore.stats.temperature)
-    animateNumber(animatedStats, 'averageTemperature', nursingStore.stats.averageTemperature)
-    animateNumber(animatedStats, 'humidity', nursingStore.stats.humidity)
-    animateNumber(animatedStats, 'humidityChange', nursingStore.stats.humidityChange)
-    animateNumber(animatedStats, 'aqi', nursingStore.stats.aqi)
-    animateNumber(animatedStats, 'aqiChange', nursingStore.stats.aqiChange)
-    animateNumber(animatedStats, 'visibility', nursingStore.stats.visibility)
-    animateNumber(animatedStats, 'visibilityChange', nursingStore.stats.visibilityChange)
-    animateNumber(animatedStats, 'pressure', nursingStore.stats.pressure)
-    animateNumber(animatedStats, 'pressureChange', nursingStore.stats.pressureChange)
-  }, 500)
-  //挂载图表: 使用 nextTick 确保 div 已经撑开，然后初始化 ECharts图。
-  nextTick(() => {
-    initTrendChart()
-    initPieChart()
-  })
 
+//生命周期钩子:这是整个脚本的“引擎开关”。(页面加载完成时)
+onMounted(async () => {
+  try {
+    // 调后端接口
+    const response = await fetch('http://localhost:5000/api/dashboard')
+    const data = await response.json()
+    serverData.value = data // 保存数据
+    streamData.value =data.scoringList
+    foods.value = data.foods
+
+    //启动数字动画: 延迟 500ms 后将真实统计数据通过 animateNumber 动态跑起来。
+    setTimeout(() => {
+      animateNumber(animatedStats, 'temperature', data.stats.temperature)
+      animateNumber(animatedStats, 'averageTemperature', data.stats.averageTemperature)
+      animateNumber(animatedStats, 'humidity', data.stats.humidity)
+      animateNumber(animatedStats, 'humidityChange', data.stats.humidityChange)
+      animateNumber(animatedStats, 'aqi', data.stats.aqi)
+      animateNumber(animatedStats, 'aqiChange', data.stats.aqiChange)
+      animateNumber(animatedStats, 'visibility', data.stats.visibility)
+      animateNumber(animatedStats, 'visibilityChange', data.stats.visibilityChange)
+      animateNumber(animatedStats, 'pressure', data.stats.pressure)
+      animateNumber(animatedStats, 'pressureChange', data.stats.pressureChange)
+    }, 500)
+
+    //挂载图表: 使用 nextTick 确保 div 已经撑开，然后初始化 ECharts图。
+    nextTick(() => {
+      initTrendChart(data.stats)
+      initPieChart(data.users)
+    })
+  } catch (error) {
+  console.error("数据加载失败:", error)
+  }
 })
 //页面销毁时:清理现场: 清除所有 setInterval 定时器。这是非常重要的习惯，如果不清除，当你切换到其他页面时，这些定时器还会跑，消耗 CPU 甚至引发报错。
 onUnmounted(() => {
@@ -291,7 +297,7 @@ onUnmounted(() => {
           <div class="poc-group">
             <div class="group-header">早餐</div>
             <div class="group-grid">
-              <div v-for="vuln in nursingStore.foods?.filter(v => v.meal === '早餐').slice(0, 4)"
+              <div v-for="vuln in foods?.filter(v => v.meal === '早餐').slice(0, 4)"
                    :key="vuln.id" class="poc-item" :class="vuln.greaseLevel">
                 <div class="poc-name">{{ vuln.name }}</div>
                 <div class="poc-type">{{ vuln.description }}</div>
@@ -305,7 +311,7 @@ onUnmounted(() => {
           <div class="poc-group">
             <div class="group-header">午餐</div>
             <div class="group-grid">
-              <div v-for="vuln in nursingStore.foods?.filter(v => v.meal === '午餐').slice(0, 4)"
+              <div v-for="vuln in foods?.filter(v => v.meal === '午餐').slice(0, 4)"
                    :key="vuln.id" class="poc-item" :class="vuln.greaseLevel">
                 <div class="poc-name">{{ vuln.name }}</div>
                 <div class="poc-type">{{ vuln.description }}</div>
@@ -319,7 +325,7 @@ onUnmounted(() => {
           <div class="poc-group">
             <div class="group-header">晚餐</div>
             <div class="group-grid">
-              <div v-for="vuln in nursingStore.foods?.filter(v => v.meal === '晚餐').slice(0, 4)"
+              <div v-for="vuln in foods?.filter(v => v.meal === '晚餐').slice(0, 4)"
                    :key="vuln.id" class="poc-item" :class="vuln.greaseLevel">
                 <div class="poc-name">{{ vuln.name }}</div>
                 <div class="poc-type">{{ vuln.description }}</div>

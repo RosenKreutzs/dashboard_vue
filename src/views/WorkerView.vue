@@ -1,8 +1,6 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { useNursingStore } from '../../database/nursingStore'
-
-const nursingStore = useNursingStore()
+import { ref, computed,onMounted } from 'vue'
+const  workers= ref([])
 
 const searchKeyword = ref('')
 const selectedSex = ref('')
@@ -14,8 +12,51 @@ const showModal = ref(false)
 const selectedVuln = ref(null)
 const activeTab = ref('attacker')
 
+
+const searchWorkers = (keyword, filters = {}) => {
+  let results = workers.value
+
+  if (keyword) {
+    const kw = keyword.toLowerCase()
+    results = results.filter(v =>
+        v.id.toLowerCase().includes(kw) ||
+        v.name.toLowerCase().includes(kw) ||
+        v.sex.toLowerCase().includes(kw) ||
+        v.nativePlace.toLowerCase().includes(kw) ||
+        v.domicileAddress.toLowerCase().includes(kw) ||
+        v.citizenship.toLowerCase().includes(kw) ||
+        v.nationality.toLowerCase().includes(kw) ||
+        v.politicsStatus.toLowerCase().includes(kw) ||
+        v.maritalStatus.toLowerCase().includes(kw) ||
+        v.certificateNumber.toLowerCase().includes(kw) ||
+        v.education.toLowerCase().includes(kw) ||
+        v.originalUnits.toLowerCase().includes(kw) ||
+        v.originalOccupation.toLowerCase().includes(kw) ||
+        v.residentialAddress.toLowerCase().includes(kw) ||
+        v.telephoneNumber.toLowerCase().includes(kw) ||
+        v.selfDescription.toLowerCase().includes(kw)
+    )
+  }
+
+  if (filters.sex) {
+    results = results.filter(v => v.sex === filters.sex)
+  }
+  if (filters.education) {
+    results = results.filter(v => v.education === filters.education)
+  }
+  if (filters.maritalStatus) {
+    results = results.filter(v => v.maritalStatus.includes(filters.maritalStatus))
+  }
+  if (filters.politicsStatus) {
+    results = results.filter(v => v.politicsStatus === filters.politicsStatus)
+  }
+
+  return results
+}
+
+
 const filteredVulns = computed(() => {
-  return nursingStore.searchWorkers(searchKeyword.value, {
+  return searchWorkers(searchKeyword.value, {
     sex: selectedSex.value,
     education: selectedEducation.value,
     maritalStatus: selectedMaritalStatus.value,
@@ -79,6 +120,18 @@ const closeModal = () => {
   showModal.value = false
   selectedVuln.value = null
 }
+onMounted(async () => {
+  try {
+    // 调后端接口
+    const response = await fetch('http://localhost:5000/api/workers')
+    const data = await response.json()
+    workers.value = data
+
+  } catch (error) {
+    console.error("数据加载失败:", error)
+  }
+})
+
 </script>
 
 <template>
