@@ -9,7 +9,15 @@ const mobileMenuOpen = ref(false)
 const showSystemModal = ref(false)
 
 const currentPath = computed(() => route?.path || '/')
-const pageTitle = computed(() => route?.meta?.title || '控制中心')
+
+// 修改 pageTitle 的逻辑，使其直接从 menuItems 中匹配
+const pageTitle = computed(() => {
+  // 在菜单项中寻找当前路径匹配的那一项
+  const activeItem = menuItems.find(item => isActive(item.path))
+
+  // 如果找到了就返回菜单名，否则回退到路由 meta 或 默认标题
+  return activeItem ? activeItem.name : (route?.meta?.title || '控制中心')
+})
 
 const systemInfo = ref({
   cpuModel: '123456789',
@@ -169,20 +177,20 @@ const goToHome = () => {
     <div class="modal-overlay" :class="{active: showSystemModal}" @click="closeSystemModal">
       <div class="modal-content system-modal" @click.stop>
         <div class="modal-header">
-          <h3 class="modal-title">💻 选择系统信息</h3>
+          <h3 class="modal-title">💻 退出/注销</h3>
           <button class="modal-close" @click="closeSystemModal">×</button>
         </div>
         
         <div class="modal-body">
           <div class="form-group">
-            <label>处理器型号</label>
+            <label>退出</label>
             <select v-model="systemInfo.cpuModel" class="form-select">
               <option v-for="cpu in cpuOptions" :key="cpu" :value="cpu">{{ cpu }}</option>
             </select>
           </div>
           
           <div class="form-group">
-            <label>操作系统</label>
+            <label>注销</label>
             <select v-model="systemInfo.osType" class="form-select">
               <option v-for="os in osOptions" :key="os" :value="os">{{ os }}</option>
             </select>

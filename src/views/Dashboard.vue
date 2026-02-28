@@ -2,141 +2,47 @@
 import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue'
 import * as echarts from 'echarts'
 import 'echarts-gl'
-import { useVulnStore } from '../stores/vulnStore'
+import { useNursingStore } from '../../database/nursingStore'
 
-const vulnStore = useVulnStore()
-
-const globalData = ref([
-  { name: 'China', value: 95, coord: [116.46, 39.92] },
-  { name: 'United States', value: 88, coord: [-95.71, 37.09] },
-  { name: 'Russia', value: 75, coord: [105.32, 61.52] },
-  { name: 'Germany', value: 65, coord: [10.45, 51.17] },
-  { name: 'Japan', value: 60, coord: [138.25, 36.20] },
-  { name: 'United Kingdom', value: 55, coord: [-3.44, 55.38] },
-  { name: 'France', value: 52, coord: [2.21, 46.23] },
-  { name: 'India', value: 48, coord: [78.96, 20.59] },
-  { name: 'Brazil', value: 42, coord: [-51.93, -14.24] },
-  { name: 'Australia', value: 38, coord: [133.78, -25.27] },
-  { name: 'Canada', value: 35, coord: [-106.35, 56.13] },
-  { name: 'South Korea', value: 32, coord: [127.85, 35.91] },
-  { name: 'Netherlands', value: 28, coord: [5.29, 52.13] },
-  { name: 'Italy', value: 25, coord: [12.57, 41.87] },
-  { name: 'Spain', value: 22, coord: [-3.75, 40.46] },
-  { name: 'Mexico', value: 20, coord: [-102.55, 23.63] },
-  { name: 'Indonesia', value: 18, coord: [113.92, -0.79] },
-  { name: 'Saudi Arabia', value: 17, coord: [45.08, 23.89] },
-  { name: 'Turkey', value: 16, coord: [35.24, 38.96] },
-  { name: 'Switzerland', value: 15, coord: [8.23, 46.82] },
-  { name: 'Poland', value: 14, coord: [19.94, 51.92] },
-  { name: 'Belgium', value: 13, coord: [4.47, 50.50] },
-  { name: 'Sweden', value: 12, coord: [18.64, 60.13] },
-  { name: 'Argentina', value: 11, coord: [-63.62, -38.42] },
-  { name: 'South Africa', value: 10, coord: [22.94, -30.56] },
-  { name: 'Austria', value: 9, coord: [14.55, 47.52] },
-  { name: 'Norway', value: 8, coord: [8.47, 60.47] },
-  { name: 'United Arab Emirates', value: 8, coord: [53.85, 23.42] },
-  { name: 'Thailand', value: 7, coord: [100.99, 15.87] },
-  { name: 'Ireland', value: 7, coord: [-8.24, 53.41] },
-  { name: 'Israel', value: 6, coord: [34.85, 31.05] },
-  { name: 'Denmark', value: 6, coord: [9.50, 56.26] },
-  { name: 'Singapore', value: 5, coord: [103.82, 1.35] },
-  { name: 'Malaysia', value: 5, coord: [101.98, 4.21] },
-  { name: 'Philippines', value: 5, coord: [121.77, 12.88] },
-  { name: 'Vietnam', value: 4, coord: [108.28, 14.06] },
-  { name: 'Egypt', value: 4, coord: [30.80, 26.82] },
-  { name: 'Pakistan', value: 4, coord: [69.35, 30.38] },
-  { name: 'Nigeria', value: 3, coord: [8.68, 9.08] },
-  { name: 'Colombia', value: 3, coord: [-74.30, 4.71] },
-  { name: 'Chile', value: 3, coord: [-71.57, -35.68] },
-  { name: 'Finland', value: 2, coord: [25.75, 61.92] },
-  { name: 'Portugal', value: 2, coord: [-8.22, 39.40] },
-  { name: 'Greece', value: 2, coord: [21.82, 39.07] },
-  { name: 'Czech Republic', value: 2, coord: [14.44, 49.82] },
-  { name: 'New Zealand', value: 1, coord: [174.89, -40.90] },
-  { name: 'Hungary', value: 1, coord: [19.50, 47.16] },
-  { name: 'Ukraine', value: 1, coord: [31.17, 48.38] },
-  { name: 'Romania', value: 1, coord: [24.97, 45.94] }
-])
+const nursingStore = useNursingStore()
 
 const animatedStats = reactive({
-  hosts: 0,
-  vulns: 0,
-  pocs: 0,
-  exps: 0,
-  accuracy: 0,
   temperature:0,
   humidity:0,
+  humidityChange:0,
   aqi:0,
+  aqiChange:0,
   visibility:0,
-  pressure:0
-})
+  visibilityChange:0,
+  pressure:0,
+  pressureChange:0,
+  averageTemperature:0,
+})// 存储天气相关的数值，初始全为 0
 
-const streamData = ref([
-  { flag: '📤', text: '平台新增 Spectre V1 POC', time: '5秒前', type: 'upload' },
-  { flag: '⬇️', text: '北京用户下载 Meltdown EXP', time: '12秒前', type: 'download' },
-  { flag: '📤', text: '平台新增 Foreshadow POC', time: '28秒前', type: 'upload' },
-  { flag: '⬇️', text: '上海用户下载 ZombieLoad EXP', time: '45秒前', type: 'download' },
-  { flag: '⬇️', text: '广东用户下载 Retbleed POC', time: '1分钟前', type: 'download' }
-])
+const temperatureTrend = {
+  maximumTemperature:nursingStore.stats.maximumTemperature,
+  minimumTemperature:nursingStore.stats.minimumTemperature
+}// 固定的温度趋势数组
 
-const heatmapChartRef = ref(null)
-const trendChartRef = ref(null)
-const pieChartRef = ref(null)
-const barChartRef = ref(null)
-const mapChartRef = ref(null)
-let streamInterval = null
-let scanInterval = null
-let currentPipelineStep = 0
-let currentCodeLine = 0
+const streamData = ref(nursingStore.scoringList)// 护工评分列表数据
 
-const pipelineSteps = [
-  { icon: '📥', label: '上传代码' },
-  { icon: '🔍', label: '静态分析' },
-  { icon: '🎯', label: '漏洞匹配' },
-  { icon: '⏱️', label: '风险评估' },
-  { icon: '📄', label: '报告生成' }
-]
+const trendChartRef = ref(null)// 用于绑定折线图 DOM 元素的引用
+const pieChartRef = ref(null)// 用于绑定饼图 DOM 元素的引用
+let streamInterval = null// 滚动定时器变量
+let scanInterval = null// 扫描定时器变量
 
-const attackGenSteps = [
-  { icon: '🎯', label: '漏洞点识别' },
-  { icon: '🤖', label: 'AI生成EXP' },
-  { icon: '⚙️', label: '代码优化' },
-  { icon: '✅', label: '验证测试' }
-]
-
-const vulnerableCodeLines = [
-  { lineNum: 1, text: 'void check_access(size_t index) {', type: 'normal' },
-  { lineNum: 2, text: '  if (index < array_size) {', type: 'normal' },
-  { lineNum: 3, text: '    char value = array[index];', type: 'vulnerable', vuln: '边界检查绕过' },
-  { lineNum: 4, text: '    temp &= cache[value * 4096];', type: 'vulnerable', vuln: 'Cache侧信道' },
-  { lineNum: 5, text: '  }', type: 'normal' },
-  { lineNum: 6, text: '  return 0;', type: 'normal' },
-  { lineNum: 7, text: '}', type: 'normal' }
-]
-
-let scanLineIndex = 0
-
-const updateScanLine = () => {
-  vulnerableCodeLines.forEach((line, idx) => {
-    line.type = idx < scanLineIndex ? 'scanned' : (idx === scanLineIndex ? 'scanning' : 'pending')
-  })
-  scanLineIndex = (scanLineIndex + 1) % (vulnerableCodeLines.length + 2)
-  if (scanLineIndex > vulnerableCodeLines.length) {
-    scanLineIndex = 0
-  }
-}
-
+//纯 JS 实现的补间动画
 const animateNumber = (target, key, endValue, duration = 2000) => {
   const startTime = Date.now()
   const startValue = target[key]
   const diff = endValue - startValue
-  
+
   const update = () => {
     const elapsed = Date.now() - startTime
     const progress = Math.min(elapsed / duration, 1)
     const easeProgress = 1 - Math.pow(1 - progress, 3)
     target[key] = Math.floor(startValue + diff * easeProgress)
-    
+
     if (progress < 1) {
       requestAnimationFrame(update)
     }
@@ -144,86 +50,16 @@ const animateNumber = (target, key, endValue, duration = 2000) => {
   requestAnimationFrame(update)
 }
 
-const initHeatmapChart = () => {
-  if (!heatmapChartRef.value) return
-  
-  const chart = echarts.init(heatmapChartRef.value)
-  
-  const cpus = ['Intel i9', 'AMD Ryzen 9', 'Apple M2', 'Xeon E5']
-  const oss = ['Windows', 'Linux', 'macOS', '其他']
-  const data = [
-    [0,0],[0,1],[0,2],[0,3],
-    [1,0],[1,1],[1,2],[1,3],
-    [2,0],[2,1],[2,2],[2,3],
-    [3,0],[3,1],[3,2],[3,3]
-  ].map(([i, j]) => {
-    const levels = [
-      [1, 1, 0.5, 0],
-      [0.5, 1, 0, 0],
-      [0, 0.3, 0.5, 0],
-      [1, 1, 0, 0]
-    ]
-    return [j, i, levels[i][j] || 0]
-  })
-
-  const option = {
-    tooltip: { position: 'top' },
-    grid: {
-      top: '5%',
-      left: '12%',
-      right: '15%',
-      bottom: '15%'
-    },
-    xAxis: {
-      type: 'category',
-      data: oss,
-      splitArea: { show: true },
-      axisLabel: { color: '#00d4ff', fontSize: 11 },
-      axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.3)' } }
-    },
-    yAxis: {
-      type: 'category',
-      data: cpus,
-      splitArea: { show: true },
-      axisLabel: { color: '#00d4ff', fontSize: 11 },
-      axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.3)' } }
-    },
-    visualMap: {
-      min: 0,
-      max: 1,
-      calculable: true,
-      orient: 'vertical',
-      right: '2%',
-      top: 'center',
-      bottom: '10%',
-      inRange: {
-        color: ['rgba(0,0,0,0.3)', 'rgba(0,255,157,0.4)', 'rgba(255,170,0,0.5)', 'rgba(255,51,102,0.6)']
-      },
-      textStyle: { color: '#fff' }
-    },
-    series: [{
-      type: 'heatmap',
-      data: data,
-      label: { show: false },
-      emphasis: {
-        itemStyle: { shadowBlur: 10, shadowColor: 'rgba(0, 212, 255, 0.5)' }
-      }
-    }]
-  }
-  
-  chart.setOption(option)
-  window.addEventListener('resize', () => chart.resize())
-}
-
+// 折线图配置
 const initTrendChart = () => {
   if (!trendChartRef.value) return
-  
+
   const chart = echarts.init(trendChartRef.value)
-  
+
   const option = {
     tooltip: { trigger: 'axis' },
     legend: {
-      data: ['POC数量', 'EXP数量'],
+      data: ['最高温度', '最低温度'],
       textStyle: { color: '#00d4ff' },
       top: 0
     },
@@ -249,10 +85,10 @@ const initTrendChart = () => {
     },
     series: [
       {
-        name: 'POC数量',
+        name: '最高温度',
         type: 'line',
         smooth: true,
-        data: [12, 15, 13, 18, 22, 20, 25],
+        data: temperatureTrend.maximumTemperature,
         itemStyle: { color: '#00d4ff' },
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -262,10 +98,10 @@ const initTrendChart = () => {
         }
       },
       {
-        name: 'EXP数量',
+        name: '最低温度',
         type: 'line',
         smooth: true,
-        data: [8, 10, 9, 12, 14, 13, 16],
+        data: temperatureTrend.minimumTemperature,
         itemStyle: { color: '#00ff9d' },
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -276,23 +112,23 @@ const initTrendChart = () => {
       }
     ]
   }
-  
+
   chart.setOption(option)
   window.addEventListener('resize', () => chart.resize())
 }
-
+// 饼图配置
 const initPieChart = () => {
   if (!pieChartRef.value) return
-  
+
   const chart = echarts.init(pieChartRef.value)
-  
-  const cveTypes = {}
-  vulnStore.vulnerabilities.forEach(v => {
-    cveTypes[v.cveType] = (cveTypes[v.cveType] || 0) + 1
+
+  const actionCapabilitys = {}
+  nursingStore.users.forEach(v => {
+    actionCapabilitys[v.actionCapability] = (actionCapabilitys[v.actionCapability] || 0) + 1
   })
-  
-  const data = Object.entries(cveTypes).map(([name, value]) => ({ name, value }))
-  
+
+  const data = Object.entries(actionCapabilitys).map(([name, value]) => ({ name, value }))
+
   const option = {
     tooltip: {
       trigger: 'item',
@@ -333,191 +169,34 @@ const initPieChart = () => {
       color: ['#00d4ff', '#00ff9d', '#ff3366', '#ffaa00']
     }]
   }
-  
+
   chart.setOption(option)
   window.addEventListener('resize', () => chart.resize())
 }
 
-const initBarChart = () => {
-  if (!barChartRef.value) return
-  
-  const chart = echarts.init(barChartRef.value)
-  
-  const attackTypes = {}
-  vulnStore.vulnerabilities.forEach(v => {
-    attackTypes[v.attackType] = (attackTypes[v.attackType] || 0) + 1
-  })
-  
-  const data = Object.entries(attackTypes).sort((a, b) => b[1] - a[1])
-  
-  const option = {
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'shadow' },
-      formatter: '{b}: {c} 个'
-    },
-    grid: {
-      left: '5%',
-      right: '15%',
-      bottom: '3%',
-      top: '10%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'value',
-      axisLabel: { color: 'rgba(255,255,255,0.6)' },
-      axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.3)' } },
-      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } }
-    },
-    yAxis: {
-      type: 'category',
-      data: data.map(d => d[0]),
-      axisLabel: { color: '#00d4ff', fontSize: 11 },
-      axisLine: { lineStyle: { color: 'rgba(0, 212, 255, 0.3)' } }
-    },
-    series: [{
-      type: 'bar',
-      data: data.map(d => d[1]),
-      itemStyle: {
-        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-          { offset: 0, color: '#00d4ff' },
-          { offset: 1, color: '#00ff9d' }
-        ])
-      },
-      barWidth: '60%',
-      label: {
-        show: true,
-        position: 'right',
-        color: '#fff',
-        formatter: '{c}'
-      }
-    }]
-  }
-  
-  chart.setOption(option)
-  window.addEventListener('resize', () => chart.resize())
-}
-
-const initMapChart = () => {
-  if (!mapChartRef.value) return
-  
-  const chart = echarts.init(mapChartRef.value)
-  
-  const ROOT_PATH = 'https://cdn.jsdelivr.net/gh/apache/echarts-website@asf-site/examples'
-  
-  const option = {
-    backgroundColor: '#000',
-    globe: {
-      baseTexture: ROOT_PATH + '/data-gl/asset/earth.jpg',
-      shading: 'color',
-      atmosphere: {
-        show: false
-      },
-      light: {
-        ambient: {
-          intensity: 0.3
-        },
-        main: {
-          intensity: 1
-        }
-      },
-      silent: true
-    },
-    visualMap: {
-      show: true,
-      dimension: 2,
-      min: 0,
-      max: 100,
-      calculable: true,
-      inRange: {
-        color: ['#ff3366', '#ffaa00', '#00d4ff', '#00ff9d']
-      },
-      text: ['下载量高', '下载量低'],
-      textStyle: { color: '#fff', fontSize: 10 },
-      right: 30,
-      top: 'center',
-      itemWidth: 15,
-      itemHeight: 200
-    },
-    series: [{
-      type: 'bar3D',
-      coordinateSystem: 'globe',
-      data: globalData.value.map(item => ({
-        name: item.name,
-        value: [...item.coord, item.value]
-      })),
-      barSize: 4,
-      minHeight: 0.5,
-      maxHeight: 25,
-      shading: 'lambert',
-      itemStyle: {
-        opacity: 0.9
-      },
-      emphasis: {
-        itemStyle: {
-          opacity: 1
-        }
-      }
-    }],
-    tooltip: {
-      trigger: 'item',
-      formatter: function(params) {
-        return params.name + '<br/>下载量: ' + params.value[2] + ' 次'
-      }
-    }
-  }
-  
-  chart.setOption(option)
-  window.addEventListener('resize', () => chart.resize())
-}
-
+//生命周期钩子:这是整个脚本的“引擎开关”。(页面加载完成时)
 onMounted(() => {
+  //启动数字动画: 延迟 500ms 后将真实统计数据通过 animateNumber 动态跑起来。
   setTimeout(() => {
-    animateNumber(animatedStats, 'hosts', vulnStore.stats.totalHosts)
-    animateNumber(animatedStats, 'vulns', vulnStore.stats.totalVulns)
-    animateNumber(animatedStats, 'pocs', vulnStore.stats.totalPocs)
-    animateNumber(animatedStats, 'exps', vulnStore.stats.totalExps)
-    animateNumber(animatedStats, 'accuracy', vulnStore.stats.accuracy)
+    animateNumber(animatedStats, 'temperature', nursingStore.stats.temperature)
+    animateNumber(animatedStats, 'averageTemperature', nursingStore.stats.averageTemperature)
+    animateNumber(animatedStats, 'humidity', nursingStore.stats.humidity)
+    animateNumber(animatedStats, 'humidityChange', nursingStore.stats.humidityChange)
+    animateNumber(animatedStats, 'aqi', nursingStore.stats.aqi)
+    animateNumber(animatedStats, 'aqiChange', nursingStore.stats.aqiChange)
+    animateNumber(animatedStats, 'visibility', nursingStore.stats.visibility)
+    animateNumber(animatedStats, 'visibilityChange', nursingStore.stats.visibilityChange)
+    animateNumber(animatedStats, 'pressure', nursingStore.stats.pressure)
+    animateNumber(animatedStats, 'pressureChange', nursingStore.stats.pressureChange)
   }, 500)
-
+  //挂载图表: 使用 nextTick 确保 div 已经撑开，然后初始化 ECharts图。
   nextTick(() => {
-    initHeatmapChart()
     initTrendChart()
     initPieChart()
-    initBarChart()
-    initMapChart()
   })
 
-  setInterval(() => {
-    currentPipelineStep = (currentPipelineStep + 1) % 5
-  }, 2000)
-
-  updateScanLine()
-  scanInterval = setInterval(() => {
-    updateScanLine()
-  }, 1500)
-
-  const cities = ['北京', '上海', '广东', '浙江', '江苏', '四川', '湖北', '福建', '山东', '陕西']
-  const vulnNames = ['Spectre V1', 'Meltdown', 'Foreshadow', 'ZombieLoad', 'Retbleed', 'RIDL', 'CacheOut', 'BHI']
-  const types = ['POC', 'EXP']
-
-  streamInterval = setInterval(() => {
-    const isUpload = Math.random() > 0.5
-    const newItem = {
-      flag: isUpload ? '📤' : '⬇️',
-      text: isUpload 
-        ? `平台新增 ${vulnNames[Math.floor(Math.random() * vulnNames.length)]} ${types[Math.floor(Math.random() * types.length)]}`
-        : `${cities[Math.floor(Math.random() * cities.length)]}用户下载 ${vulnNames[Math.floor(Math.random() * vulnNames.length)]} ${types[Math.floor(Math.random() * types.length)]}`,
-      time: '刚刚',
-      type: isUpload ? 'upload' : 'download'
-    }
-    streamData.value.unshift(newItem)
-    if (streamData.value.length > 8) {
-      streamData.value.pop()
-    }
-  }, 3000)
 })
-
+//页面销毁时:清理现场: 清除所有 setInterval 定时器。这是非常重要的习惯，如果不清除，当你切换到其他页面时，这些定时器还会跑，消耗 CPU 甚至引发报错。
 onUnmounted(() => {
   if (streamInterval) clearInterval(streamInterval)
   if (scanInterval) clearInterval(scanInterval)
@@ -537,27 +216,27 @@ onUnmounted(() => {
           <div class="stat-item">
             <div class="stat-value">{{ animatedStats.temperature }}</div>
             <div class="stat-label">平均温度</div>
-            <div class="stat-change">↑ {{ vulnStore.stats.weeklyGrowth }}%</div>
+            <div class="stat-change">↑ {{ animatedStats.averageTemperature }}%</div>
           </div>
           <div class="stat-item">
             <div class="stat-value">{{ animatedStats.humidity }}</div>
             <div class="stat-label">平均湿度</div>
-            <div class="stat-change">↑ 8.3%</div>
+            <div class="stat-change">{{ animatedStats.humidityChange }}%</div>
           </div>
           <div class="stat-item">
             <div class="stat-value">{{ animatedStats.aqi }}</div>
             <div class="stat-label">空气质量指数</div>
-            <div class="stat-change">+{{ vulnStore.stats.weeklyNewPocs }} 本周新增</div>
+            <div class="stat-change">+{{ animatedStats.aqiChange }} 本周新增</div>
           </div>
           <div class="stat-item">
             <div class="stat-value">{{ animatedStats.visibility }}</div>
             <div class="stat-label">能见度</div>
-            <div class="stat-change">↑ 15.2%</div>
+            <div class="stat-change">{{ animatedStats.visibilityChange }}%</div>
           </div>
           <div class="stat-item">
             <div class="stat-value">{{ animatedStats.pressure }}%</div>
             <div class="stat-label">大气压强</div>
-            <div class="stat-change">↑ 2.1%</div>
+            <div class="stat-change">{{ animatedStats.pressureChange }}%</div>
           </div>
         </div>
       </div>
@@ -571,7 +250,7 @@ onUnmounted(() => {
         <div ref="trendChartRef" class="chart-container"></div>
       </div>
 
-      <!-- CVE类型饼图 -->
+      <!-- 饼图 -->
       <div class="glass-card pie-card">
         <div class="card-header">
           <h3 class="card-title">🎂 行动能力分布</h3>
@@ -584,33 +263,39 @@ onUnmounted(() => {
       <div class="glass-card stream-card">
         <div class="card-header">
           <h3 class="card-title">🌐 护工评分</h3>
-          <span class="card-badge">本周数据</span>
+          <span class="card-badge">本月数据</span>
         </div>
-        <div class="stream-list">
-          <div
-              v-for="(item, idx) in streamData"
-              :key="idx"
-              class="stream-item"
-              :class="item.type"
-          >
-            <span class="stream-flag">{{ item.flag }}</span>
-            <div class="stream-content">
-              <div class="stream-text">{{ item.text }}</div>
-              <div class="stream-meta">{{ item.time }}</div>
+
+        <div class="stream-list-container">
+          <div class="stream-track">
+            <div v-for="(item, idx) in streamData" :key="'a' + idx" class="stream-item" :class="item.type">
+              <span class="stream-flag">{{ item.flag }}</span>
+              <div class="stream-content">
+                <div class="stream-text">{{ item.text }}</div>
+                <div class="stream-meta">{{ item.score }}</div>
+              </div>
+            </div>
+            <div v-for="(item, idx) in streamData" :key="'b' + idx" class="stream-item" :class="item.type">
+              <span class="stream-flag">{{ item.flag }}</span>
+              <div class="stream-content">
+                <div class="stream-text">{{ item.text }}</div>
+                <div class="stream-meta">{{ item.score }}</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-            <!-- 三餐情况 -->
+      <!-- 三餐情况 -->
       <div class="glass-card poc-card">
         <div class="poc-grouped-container">
           <div class="poc-group">
             <div class="group-header">早餐</div>
             <div class="group-grid">
-              <div v-for="vuln in vulnStore.vulnerabilities.slice(0, 4)" :key="vuln.id" class="poc-item" :class="vuln.riskLevel">
+              <div v-for="vuln in nursingStore.foods?.filter(v => v.meal === '早餐').slice(0, 4)"
+                   :key="vuln.id" class="poc-item" :class="vuln.greaseLevel">
                 <div class="poc-name">{{ vuln.name }}</div>
-                <div class="poc-type">{{ vuln.attackType }}</div>
-                <span class="poc-risk" :class="vuln.riskLevel">{{ vuln.riskText }}</span>
+                <div class="poc-type">{{ vuln.description }}</div>
+                <span class="poc-risk" :class="vuln.greaseLevel">{{ vuln.grease }}</span>
               </div>
             </div>
           </div>
@@ -620,10 +305,11 @@ onUnmounted(() => {
           <div class="poc-group">
             <div class="group-header">午餐</div>
             <div class="group-grid">
-              <div v-for="vuln in vulnStore.vulnerabilities.slice(4, 8)" :key="vuln.id" class="poc-item" :class="vuln.riskLevel">
+              <div v-for="vuln in nursingStore.foods?.filter(v => v.meal === '午餐').slice(0, 4)"
+                   :key="vuln.id" class="poc-item" :class="vuln.greaseLevel">
                 <div class="poc-name">{{ vuln.name }}</div>
-                <div class="poc-type">{{ vuln.attackType }}</div>
-                <span class="poc-risk" :class="vuln.riskLevel">{{ vuln.riskText }}</span>
+                <div class="poc-type">{{ vuln.description }}</div>
+                <span class="poc-risk" :class="vuln.greaseLevel">{{ vuln.grease }}</span>
               </div>
             </div>
           </div>
@@ -633,13 +319,15 @@ onUnmounted(() => {
           <div class="poc-group">
             <div class="group-header">晚餐</div>
             <div class="group-grid">
-              <div v-for="vuln in vulnStore.vulnerabilities.slice(8, 12)" :key="vuln.id" class="poc-item" :class="vuln.riskLevel">
+              <div v-for="vuln in nursingStore.foods?.filter(v => v.meal === '晚餐').slice(0, 4)"
+                   :key="vuln.id" class="poc-item" :class="vuln.greaseLevel">
                 <div class="poc-name">{{ vuln.name }}</div>
-                <div class="poc-type">{{ vuln.attackType }}</div>
-                <span class="poc-risk" :class="vuln.riskLevel">{{ vuln.riskText }}</span>
+                <div class="poc-type">{{ vuln.description }}</div>
+                <span class="poc-risk" :class="vuln.greaseLevel">{{ vuln.grease }}</span>
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>
@@ -647,6 +335,47 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+/* 外层容器：裁剪掉超出部分 */
+.stream-list-container {
+  margin-top: 15px;
+  height: 210px; /* 这里的固定高度要根据你的卡片大小调整 */
+  overflow: hidden;
+  position: relative;
+}
+
+/* 内部轨道：执行动画 */
+.stream-track {
+  display: flex;
+  flex-direction: column;
+  animation: scrollLoop 15s linear infinite; /* 15s 控制滚动速度 */
+}
+
+/* 鼠标悬停时暂停滚动，方便用户阅读 */
+.stream-track:hover {
+  animation-play-state: paused;
+}
+
+.stream-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border-left: 2px solid transparent;
+  flex-shrink: 0; /* 防止内容被压缩 */
+}
+
+/* 关键帧：从 0 滚动到总高度的一半（因为我们复制了一份数据） */
+@keyframes scrollLoop {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
 .dashboard {
   width: 100%;
 }
@@ -1197,11 +926,11 @@ onUnmounted(() => {
   .overview-stats {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   .poc-grid {
     grid-template-columns: repeat(4, 1fr);
   }
-  
+
   .pie-card, .bar-card, .heatmap-card, .trend-card, .ai-pipeline-card, .exp-gen-card, .map-card, .stream-card {
     grid-column: span 6;
   }
@@ -1211,7 +940,7 @@ onUnmounted(() => {
   .poc-grid {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   .pie-card, .bar-card, .heatmap-card, .trend-card, .ai-pipeline-card, .exp-gen-card, .map-card, .stream-card, .poc-card {
     grid-column: span 12;
   }

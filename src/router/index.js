@@ -24,12 +24,6 @@ const routes = [
     name: 'Worker',
     component: () => import('../views/WorkerView.vue'),
     meta: { title: '老人信息展示' }
-  },
-  {
-    path: '/detail/:id',
-    name: 'Detail',
-    component: () => import('../views/VulnDetail.vue'),
-    meta: { title: '详情' }
   }
 ]
 

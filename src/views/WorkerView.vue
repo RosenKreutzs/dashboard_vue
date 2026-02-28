@@ -1,58 +1,59 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useVulnStore } from '../stores/vulnStore'
+import { useNursingStore } from '../../database/nursingStore'
 
-const vulnStore = useVulnStore()
+const nursingStore = useNursingStore()
 
 const searchKeyword = ref('')
-const selectedCveType = ref('')
-const selectedAttackType = ref('')
-const selectedArch = ref('')
-const selectedRisk = ref('')
+const selectedSex = ref('')
+const selectedEducation = ref('')
+const selectedMaritalStatus = ref('')
+const selectedPoliticsStatus = ref('')
 
 const showModal = ref(false)
 const selectedVuln = ref(null)
 const activeTab = ref('attacker')
 
 const filteredVulns = computed(() => {
-  return vulnStore.searchVulns(searchKeyword.value, {
-    cveType: selectedCveType.value,
-    attackType: selectedAttackType.value,
-    architecture: selectedArch.value,
-    riskLevel: selectedRisk.value
+  return nursingStore.searchWorkers(searchKeyword.value, {
+    sex: selectedSex.value,
+    education: selectedEducation.value,
+    maritalStatus: selectedMaritalStatus.value,
+    politicsStatus: selectedPoliticsStatus.value
   })
 })
 
-const cveTypes = [
-  { label: '全部类型', value: '' },
-  { label: '侧信道漏洞', value: '侧信道漏洞' },
-  { label: '瞬态执行漏洞', value: '瞬态执行漏洞' },
-  { label: '架构错误漏洞', value: '架构错误漏洞' }
+const Sexes = [
+  { label: '性别', value: '' },
+  { label: '男性', value: '男' },
+  { label: '女性', value: '女' }
 ]
 
-const attackTypes = [
-  { label: '全部攻击类型', value: '' },
-  { label: 'Cache侧信道攻击', value: 'Cache侧信道攻击' },
-  { label: 'Timing侧信道攻击', value: 'Timing侧信道攻击' },
-  { label: 'Power侧信道攻击', value: 'Power侧信道攻击' },
-  { label: 'Meltdown类攻击', value: 'Meltdown类攻击' },
-  { label: 'Spectre类攻击', value: 'Spectre类攻击' },
-  { label: '架构错误', value: '架构错误' }
+const Educations = [
+  { label: '文化程度', value: '' },
+  { label: '小学学历', value: '小学' },
+  { label: '初中学历', value: '初中' },
+  { label: '高中学历', value: '高中' },
+  { label: '本科学历', value: '本科' },
+  { label: '硕士学历', value: '硕士' },
+  { label: '博士学历', value: '博士' },
+  { label: '中专学历', value: '中专' },
+  { label: '大专学历', value: '大专' }
 ]
 
-const architectures = [
-  { label: '全部架构', value: '' },
-  { label: 'Intel', value: 'Intel' },
-  { label: 'AMD', value: 'AMD' },
-  { label: 'ARM', value: 'ARM' },
-  { label: 'RISC-V', value: 'RISC-V' }
+const MaritalStatuses = [
+  { label: '婚姻情况', value: '' },
+  { label: '未婚', value: '未婚' },
+  { label: '已婚', value: '已婚' },
+  { label: '离异', value: '离异' },
+  { label: '丧偶', value: '丧偶' },
 ]
 
-const riskLevels = [
-  { label: '工作情况', value: '' },
-  { label: '工作', value: 'high' },
-  { label: '待定', value: 'medium' },
-  { label: '放假', value: 'low' }
+const PoliticsStatuses = [
+  { label: '政治面貌', value: '' },
+  { label: '群众', value: '群众' },
+  { label: '党员', value: '党员' },
+  { label: '其他', value: '其他' }
 ]
 
 const openDetail = (vuln) => {
@@ -89,39 +90,39 @@ const closeModal = () => {
         <input 
           v-model="searchKeyword" 
           type="text" 
-          placeholder="搜索漏洞名称、CVE类型、描述..."
+          placeholder="搜索名称、描述..."
           class="search-input"
         />
       </div>
       
       <div class="filter-group">
-        <select v-model="selectedCveType" class="filter-select">
-          <option v-for="item in cveTypes" :key="item.value" :value="item.value">
+        <select v-model="selectedSex" class="filter-select">
+          <option v-for="item in Sexes" :key="item.value" :value="item.value">
             {{ item.label }}
           </option>
         </select>
         
-        <select v-model="selectedAttackType" class="filter-select">
-          <option v-for="item in attackTypes" :key="item.value" :value="item.value">
+        <select v-model="selectedEducation" class="filter-select">
+          <option v-for="item in Educations" :key="item.value" :value="item.value">
             {{ item.label }}
           </option>
         </select>
         
-        <select v-model="selectedArch" class="filter-select">
-          <option v-for="item in architectures" :key="item.value" :value="item.value">
+        <select v-model="selectedMaritalStatus" class="filter-select">
+          <option v-for="item in MaritalStatuses" :key="item.value" :value="item.value">
             {{ item.label }}
           </option>
         </select>
-        
-        <select v-model="selectedRisk" class="filter-select">
-          <option v-for="item in riskLevels" :key="item.value" :value="item.value">
+
+        <select v-model="selectedPoliticsStatus" class="filter-select">
+          <option v-for="item in PoliticsStatuses" :key="item.value" :value="item.value">
             {{ item.label }}
           </option>
         </select>
       </div>
       
       <div class="result-count">
-        找到 <span class="count">{{ filteredVulns.length }}</span> 个漏洞EXP
+        找到 <span class="count">{{ filteredVulns.length }}</span> 个护工
       </div>
     </div>
 
@@ -131,41 +132,41 @@ const closeModal = () => {
         v-for="vuln in filteredVulns" 
         :key="vuln.id" 
         class="exp-card glass-card"
-        :class="vuln.riskLevel"
+        :class="vuln.politicsStatus"
       >
         <div class="exp-header">
           <h3 class="exp-name">{{ vuln.name }}</h3>
-          <span class="risk-badge" :class="vuln.riskLevel">{{ vuln.riskText }}</span>
+          <span class="risk-badge" :class="vuln.politicsStatus">{{ vuln.politicsStatus }}</span>
         </div>
         
         <div class="exp-tags">
-          <span class="tag attacker">🎯 攻击者代码</span>
-          <span class="tag victim">🛡️ 受害者代码</span>
+          <span class="tag attacker">🎯 {{ vuln.id }}</span>
+          <span class="tag victim">🛡️ {{ vuln.telephoneNumber }}</span>
         </div>
         
-        <p class="exp-desc">{{ vuln.description }}</p>
+        <p class="exp-desc">{{ vuln.selfDescription }}</p>
         
         <div class="exp-meta">
 <!--          编号-->
           <span class="meta-item">
             <span class="meta-icon">⚡</span>
-            {{ vuln.attackType }}
+            {{ vuln.education }}
           </span>
           <!--          电话号-->
           <span class="meta-item">
             <span class="meta-icon">💻</span>
-            {{ vuln.architecture }}
+            {{ vuln.politicsStatus }}
           </span>
         </div>
         
         <div class="exp-stats">
           <div class="stat">
             <span class="stat-label">护工评分</span>
-            <span class="stat-value">{{ vuln.successRate }}</span>
+            <span class="stat-value">{{ vuln.score }}</span>
           </div>
           <div class="stat">
             <span class="stat-label">年龄</span>
-            <span class="stat-value">{{ vuln.avgTime }}</span>
+            <span class="stat-value">{{ vuln.age }}</span>
           </div>
         </div>
         
@@ -183,7 +184,7 @@ const closeModal = () => {
     <!-- 无结果提示 -->
     <div v-if="filteredVulns.length === 0" class="empty-state">
       <div class="empty-icon">💥</div>
-      <h3>未找到匹配的EXP</h3>
+      <h3>未找到匹配的护工</h3>
       <p>请尝试调整筛选条件</p>
     </div>
 
@@ -193,95 +194,35 @@ const closeModal = () => {
         <div class="modal-header">
           <div class="modal-title-wrap">
             <h3 class="modal-title">{{ selectedVuln.name }}</h3>
-            <span class="risk-badge" :class="selectedVuln.riskLevel">{{ selectedVuln.riskText }}</span>
+            <span class="risk-badge" :class="selectedVuln.id">{{ selectedVuln.id }}</span>
           </div>
           <button class="modal-close" @click="closeModal">×</button>
         </div>
-        
+
         <div class="modal-body">
-          <!-- 代码标签页 -->
-          <div class="code-tabs">
-            <button 
-              class="tab-btn" 
-              :class="{active: activeTab === 'attacker'}"
-              @click="activeTab = 'attacker'"
-            >
-              🎯 攻击者代码
-            </button>
-            <button 
-              class="tab-btn" 
-              :class="{active: activeTab === 'victim'}"
-              @click="activeTab = 'victim'"
-            >
-              🛡️ 受害者代码
-            </button>
-          </div>
-
-          <!-- 攻击者代码 -->
-          <div v-if="activeTab === 'attacker'" class="code-section">
-            <div class="code-header">
-              <h4>💀 攻击者代码 (Attacker)</h4>
-              <p>攻击者利用此代码对目标系统发起攻击</p>
-            </div>
-            <div class="code-block">
-              <pre>{{ selectedVuln.expAttackerCode }}</pre>
-            </div>
-            <button class="btn-download-full" @click="downloadExp(selectedVuln, 'attacker')">
-              ⬇️ 下载攻击者代码
-            </button>
-          </div>
-
-          <!-- 受害者代码 -->
-          <div v-if="activeTab === 'victim'" class="code-section">
-            <div class="code-header">
-              <h4>🛡️ 受害者代码 (Victim)</h4>
-              <p>可能受到攻击的代码示例，展示了漏洞触发点</p>
-            </div>
-            <div class="code-block">
-              <pre>{{ selectedVuln.expVictimCode }}</pre>
-            </div>
-            <button class="btn-download-full" @click="downloadExp(selectedVuln, 'victim')">
-              ⬇️ 下载受害者代码
-            </button>
-          </div>
-
           <!-- 基本信息 -->
           <div class="vuln-section">
             <h4>📌 基本信息</h4>
             <div class="info-grid">
               <div class="info-item">
-                <span class="info-label">CVE类型</span>
-                <span class="info-value">{{ selectedVuln.cveType }}</span>
+                <span class="info-label">政治面貌</span>
+                <span class="info-value">{{ selectedVuln.politicsStatus }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">攻击类型</span>
-                <span class="info-value">{{ selectedVuln.attackType }}</span>
+                <span class="info-label">年龄</span>
+                <span class="info-value">{{ selectedVuln.age }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">处理器架构</span>
-                <span class="info-value">{{ selectedVuln.architecture }}</span>
+                <span class="info-label">护工评分</span>
+                <span class="info-value">{{ selectedVuln.score }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">成功率</span>
-                <span class="info-value">{{ selectedVuln.successRate }}</span>
+                <span class="info-label">电话</span>
+                <span class="info-value">{{ selectedVuln.telephoneNumber }}</span>
               </div>
             </div>
           </div>
 
-          <!-- 支持平台 -->
-          <div class="vuln-section">
-            <h4>⚙️ 支持平台</h4>
-            <div class="platform-list">
-              <span class="platform-item" v-for="os in selectedVuln.osSupport" :key="os">
-                {{ os }}
-              </span>
-            </div>
-            <div class="cpu-list">
-              <span v-for="cpu in selectedVuln.cpuModels" :key="cpu" class="cpu-item">
-                {{ cpu }}
-              </span>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -537,14 +478,36 @@ const closeModal = () => {
   gap: 15px;
 }
 
+/* 添加这部分样式 */
+.modal-header {
+  display: flex;
+  justify-content: space-between; /* 将标题推向左边，关闭按钮推向右边 */
+  align-items: center;           /* 垂直方向居中对齐 */
+  margin-bottom: 20px;           /* 与下方内容保持一定间距 */
+  width: 100%;                   /* 确保占满全宽 */
+}
+
+/* 确保标题包裹层也是 flex，让名字和勋章在一行（你已有的代码里应该有了） */
+.modal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* 微调关闭按钮 */
 .modal-close {
   background: none;
   border: none;
-  color: #fff;
+  color: rgba(255, 255, 255, 0.7); /* 稍微降暗一点，鼠标悬停再变亮 */
   font-size: 28px;
   cursor: pointer;
-  padding: 0;
+  padding: 0 5px;
   line-height: 1;
+  transition: color 0.3s;
+}
+
+.modal-close:hover {
+  color: #fff; /* 鼠标移上去变白 */
 }
 
 .code-tabs {
