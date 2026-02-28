@@ -1,11 +1,10 @@
 # CPU漏洞检测平台 (CPU-POC)
 
-一个专业的CPU漏洞检测与漏洞代码资源下载平台，基于Vue 3 + Vite构建，采用科技风数据大屏界面设计。
+
 
 ## 平台简介
 
-CPU漏洞检测平台是一个专注于CPU处理器漏洞研究、检测和漏洞代码资源分享的系统。平台提供漏洞知识库浏览、POC/EXP代码下载、源代码漏洞分析等功能，帮助安全研究人员快速了解漏洞信息并进行防御性研究。
-
+这是一套专为现代养老机构设计的可视化后台管理系统。平台采用赛博朋克视觉风格，结合实时数据分析，旨在为管理人员提供直观、高效的决策支持。
 ## 功能特色
 
 ### 🖥️ 数据大屏 (Dashboard)
@@ -19,35 +18,12 @@ CPU漏洞检测平台是一个专注于CPU处理器漏洞研究、检测和漏�
 - **中国地图分布** - 动态展示各省份POC/EXP下载热度
 - **漏洞知识库** - 展示平台收录的20+主流CPU漏洞
 
-### 🔍 POC浏览 (POC列表)
-- 漏洞搜索与关键词过滤
-- CVE类型分类筛选
-- 攻击类型筛选
-- 风险等级筛选
-- 漏洞卡片展示（含名称、类型、风险等级、成功率等）
-- POC代码在线预览
-- POC代码下载功能
-
-### 💀 EXP浏览 (EXP列表)
-- 漏洞EXP代码展示
-- 攻击者代码/受害者代码Tab切换
-- 攻击代码语法高亮
-- 代码复制功能
-
-### 🛡️ 代码检测 (Detect)
-- 单文件源代码上传
-- AI漏洞分析流程动画展示
-- 漏洞检测结果展示（漏洞名称、类型、风险等级）
-- 基于漏洞类型生成攻击代码（EXP）
-- 攻击代码在线预览与下载
-
-### 📱 漏洞详情
-- 完整漏洞信息展示
-- POC代码展示
-- EXP攻击代码/受害者代码展示
-- 支持的CPU型号列表
-- 操作系统兼容性
-- 攻击成功率与平均耗时
+- **实时动态大屏 (Dashboard)：** - 对接 OpenWeatherMap 实时抓取重庆天气数据，动态展示温度趋势、空气质量及能见度变化。
+- **老人信息系统：** - 支持按行动能力、健康指标（血糖、血压）进行筛选，可视化展示老人健康状态。
+- **护工考评系统：** - 集成实时评分排名轨道，直观展示护工服务质量。
+- **身份验证：** - 基于 SHA-256 哈希加密的账户体系，确保用户信息安全存储于 accounts.json。
+- **路由守卫：** - 全全局 Token 校验拦截，防止未授权访问。
+- **响应式布局：** - 完美适配大屏监控、桌面办公及移动端访问。
 
 ## 技术栈
 
@@ -66,28 +42,23 @@ CPU漏洞检测平台是一个专注于CPU处理器漏洞研究、检测和漏�
 ## 项目结构
 
 ```
-cpu-app/
-├── src/
-│   ├── assets/           # 静态资源
+NeuralCore/
+├── backend/                # Flask 后端服务
+│   └── app.py              # API 核心逻辑与天气对接
+├── database/               # JSON 数据仓库
+│   ├── accounts.json       # 账户信息 (SHA-256 加密)
+│   ├── users.json          # 老人健康数据
+│   ├── workers.json        # 护工基本资料
+│   └── foods.json          # 膳食营养数据
+├── src/                    # Vue 前端源码
 │   ├── components/
-│   │   └── layout/      # 布局组件
-│   │       └── AppLayout.vue
-│   ├── router/
-│   │   └── index.js     # 路由配置
-│   ├── stores/
-│   │   └── vulnStore.js # 漏洞数据状态管理
-│   ├── views/
-│   │   ├── Dashboard.vue    # 数据大屏
-│   │   ├── POCView.vue     # POC列表页
-│   │   ├── EXPView.vue     # EXP列表页
-│   │   ├── DetectView.vue  # 代码检测页
-│   │   └── VulnDetail.vue  # 漏洞详情页
-│   ├── App.vue
-│   ├── main.js
-│   └── style.css
-├── dist/                # 构建输出目录
-├── package.json
-└── vite.config.js       # Vite配置文件
+│   │   └── layout/         # 核心布局组件 (AppLayout.vue)
+│   ├── views/              # 页面视图 (Dashboard, User, Worker, Auth)
+│   ├── router/             # 路由配置与安全守卫
+│   ├── App.vue             # 根组件
+│   └── main.js             # 入口文件
+├── public/                 # 静态资源
+└── vite.config.js          # Vite 配置文件
 ```
 
 ## 快速开始
@@ -143,44 +114,14 @@ npm run preview
 ### 方法3：静态托管平台
 可直接部署到 Vercel、Netlify、GitHub Pages 等平台
 
-## 后端API（可选）
-
-平台支持连接后端进行实际的代码漏洞分析：
 
 ### Flask后端
 位于 `backend/app.py`
 
 ```bash
 cd backend
-pip install -r requirements.txt
 python app.py
 ```
 
-后端提供以下API：
-- `POST /api/analyze` - 分析上传的代码文件
-- `POST /api/generate-exp` - 根据漏洞类型生成攻击代码
-
 前端默认连接 `http://localhost:5000`
 
-## 预设漏洞数据
-
-平台内置20个主流CPU漏洞数据，包括：
-
-| 漏洞名称 | CVE类型 | 攻击类型 | 风险等级 |
-|---------|---------|---------|---------|
-| Spectre V1 | 瞬态执行漏洞 | Spectre类攻击 | 高危 |
-| Meltdown | 瞬态执行漏洞 | Meltdown类攻击 | 高危 |
-| Foreshadow | 瞬态执行漏洞 | Meltdown类攻击 | 高危 |
-| ZombieLoad | 瞬态执行漏洞 | Meltdown类攻击 | 高危 |
-| Retbleed | 瞬态执行漏洞 | Spectre类攻击 | 高危 |
-| RIDL | 瞬态执行漏洞 | Meltdown类攻击 | 高危 |
-| CacheOut | 瞬态执行漏洞 | Meltdown类攻击 | 高危 |
-| BHI | 瞬态执行漏洞 | Spectre类攻击 | 高危 |
-
-## 注意事项
-
-⚠️ **免责声明**：本平台仅供安全研究教育目的，请勿将这些技术用于非法用途。作者不对任何滥用负责。
-
-## 许可证
-
-MIT License
