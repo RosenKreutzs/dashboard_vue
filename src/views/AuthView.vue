@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const isLogin = ref(true)
-const BASE_URL = 'http://localhost:5000/api' // 后端 API 基地址
+const BASE_URL = 'http://localhost:5000/api' // 后端 API 基地址a
 
 // 登录数据
 const loginForm = reactive({
