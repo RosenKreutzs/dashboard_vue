@@ -62,7 +62,6 @@ def get_real_weather_stats():
         # 1. 获取当前天气 (Current Weather)
         curr_url = f"https://api.openweathermap.org/data/2.5/weather?q={CITY_NAME}&appid={WEATHER_API_KEY}&units=metric"
         curr_res = requests.get(curr_url, timeout=5).json()
-        print(f"DEBUG API Response: {curr_res}") #
 
         # 2. 获取空气质量 (Air Pollution)
         lat, lon = curr_res['coord']['lat'], curr_res['coord']['lon']
