@@ -31,6 +31,24 @@ const routes = [
     name: 'Worker',
     component: () => import('../views/WorkerView.vue'),
     meta: { title: '老人信息展示' }
+  },
+  {
+    path: '/food',
+    name: 'Food',
+    component: () => import('../views/FoodView.vue'),
+    meta: { title: '膳食管理', hideLayout: false }
+  },
+  {
+    path: '/activity',
+    name: 'Activity',
+    component: () => import('../views/ActivityView.vue'),
+    meta: { title: '活动管理', hideLayout: false }
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: () => import('../views/ProfileView.vue'),
+    meta: { title: '个人信息', hideLayout: false }
   }
 ]
 

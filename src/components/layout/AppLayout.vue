@@ -108,6 +108,30 @@ const menuItems = [
 
     children: []
 
+  },
+
+  {
+
+    name: '膳食管理',
+
+    path: '/food',
+
+    icon: '🍽️',
+
+    children: []
+
+  },
+
+  {
+
+    name: '活动管理',
+
+    path: '/activity',
+
+    icon: '📸',
+
+    children: []
+
   }
 
 ]
@@ -164,6 +188,11 @@ const goToHome = () => {
 
 }
 
+const goToProfile = () => {
+  showSystemModal.value = false
+  router.push('/profile')
+}
+
 </script>
 
 
@@ -182,7 +211,7 @@ const goToHome = () => {
 
       <div class="logo">
 
-        <h1>ShunFengYiYang</h1>
+        <h1>顺风颐养</h1>
 
         <p>养老院后台管理系统</p>
 
@@ -323,6 +352,9 @@ const goToHome = () => {
 
           <div class="action-group">
             <p class="action-label">系统操作</p>
+            <button class="btn-profile" @click="goToProfile">
+              <span class="btn-icon">⚙️</span> 个人设置
+            </button>
             <button class="btn-logout" @click="handleLogout">
               <span class="btn-icon">🚪</span> 退出当前登录
             </button>
@@ -346,15 +378,15 @@ const goToHome = () => {
   align-items: center;
   gap: 15px;
   padding: 15px;
-  background: rgba(0, 212, 255, 0.05);
-  border: 1px solid rgba(0, 212, 255, 0.1);
+  background: rgba(91, 140, 110, 0.06);
+  border: 1px solid rgba(91, 140, 110, 0.12);
   border-radius: 12px;
   margin-bottom: 25px;
 }
 
 .user-avatar {
   font-size: 32px;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(91, 140, 110, 0.1);
   width: 60px;
   height: 60px;
   display: flex;
@@ -366,7 +398,7 @@ const goToHome = () => {
 
 .user-details .user-id {
   font-size: 14px;
-  color: #fff;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -379,30 +411,56 @@ const goToHome = () => {
 .status-tag {
   font-size: 10px;
   padding: 2px 8px;
-  background: rgba(0, 255, 157, 0.2);
-  color: #00ff9d;
+  background: rgba(91, 140, 110, 0.15);
+  color: var(--primary);
   border-radius: 4px;
 }
 
 /* 新增：操作区域样式 */
 .action-group {
   margin-bottom: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .action-label {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
   margin-bottom: 10px;
+}
+
+/* 新增：个人设置按钮样式（绿色主题） */
+.btn-profile {
+  width: 100%;
+  padding: 12px;
+  background: rgba(91, 140, 110, 0.08);
+  border: 1px solid rgba(91, 140, 110, 0.25);
+  border-radius: 8px;
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-profile:hover {
+  background: rgba(91, 140, 110, 0.15);
+  border-color: var(--primary);
 }
 
 /* 新增：退出按钮样式（红色警告风格） */
 .btn-logout {
   width: 100%;
   padding: 12px;
-  background: rgba(255, 51, 102, 0.1);
-  border: 1px solid rgba(255, 51, 102, 0.3);
+  background: rgba(224, 96, 96, 0.08);
+  border: 1px solid rgba(224, 96, 96, 0.25);
   border-radius: 8px;
-  color: #ff3366;
+  color: var(--danger);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -414,9 +472,8 @@ const goToHome = () => {
 }
 
 .btn-logout:hover {
-  background: rgba(255, 51, 102, 0.2);
-  border-color: #ff3366;
-  box-shadow: 0 0 15px rgba(255, 51, 102, 0.3);
+  background: rgba(224, 96, 96, 0.15);
+  border-color: var(--danger);
 }
 
 .app-layout {
@@ -446,10 +503,10 @@ const goToHome = () => {
 
   z-index: 0;
 
-  opacity: 0.08;
+  opacity: 0.04;
 
-  background-image: linear-gradient(rgba(0, 212, 255, 0.1) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(0, 212, 255, 0.1) 1px, transparent 1px);
+  background-image: linear-gradient(rgba(91, 140, 110, 0.1) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(91, 140, 110, 0.1) 1px, transparent 1px);
 
   background-size: 50px 50px;
 
@@ -502,9 +559,9 @@ const goToHome = () => {
 
   height: 100vh;
 
-  background: linear-gradient(180deg, rgba(10, 14, 39, 0.98) 0%, rgba(16, 22, 58, 0.95) 100%);
+  background: #ffffff;
 
-  border-right: 1px solid var(--border-glow);
+  border-right: 1px solid rgba(91, 140, 110, 0.15);
 
   z-index: 100;
 
@@ -513,6 +570,8 @@ const goToHome = () => {
   display: flex;
 
   flex-direction: column;
+
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
 
 }
 
@@ -532,17 +591,13 @@ const goToHome = () => {
 
 .logo h1 {
 
-  font-family: 'Orbitron', sans-serif;
+  font-family: var(--font-heading);
 
   font-size: 20px;
 
   font-weight: 700;
 
-  background: linear-gradient(135deg, var(--secondary), var(--accent));
-
-  -webkit-background-clip: text;
-
-  -webkit-text-fill-color: transparent;
+  color: var(--primary);
 
 }
 
@@ -551,7 +606,7 @@ const goToHome = () => {
 
   font-size: 11px;
 
-  color: var(--secondary);
+  color: var(--text-secondary);
 
   margin-top: 5px;
 
@@ -577,7 +632,7 @@ const goToHome = () => {
 
   padding: 14px 20px;
 
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
 
   text-decoration: none;
 
@@ -594,20 +649,18 @@ const goToHome = () => {
 
 .nav-link:hover {
 
-  background: rgba(0, 212, 255, 0.1);
+  background: rgba(91, 140, 110, 0.08);
 
-  color: var(--secondary);
+  color: var(--primary);
 
 }
 
 
 .nav-link.active {
 
-  background: rgba(0, 212, 255, 0.15);
+  background: rgba(91, 140, 110, 0.12);
 
-  color: var(--secondary);
-
-  box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+  color: var(--primary);
 
 }
 
@@ -649,9 +702,9 @@ const goToHome = () => {
 
   padding: 12px;
 
-  background: rgba(0, 0, 0, 0.3);
+  background: #f8f9f5;
 
-  border: 1px solid var(--border-glow);
+  border: 1px solid rgba(91, 140, 110, 0.15);
 
   border-radius: 10px;
 
@@ -666,7 +719,7 @@ const goToHome = () => {
 
 .system-btn:hover {
 
-  background: rgba(0, 212, 255, 0.1);
+  background: rgba(91, 140, 110, 0.08);
 
   border-color: var(--secondary);
 
@@ -695,7 +748,7 @@ const goToHome = () => {
 
   font-size: 10px;
 
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
 
   margin-bottom: 2px;
 
@@ -706,7 +759,7 @@ const goToHome = () => {
 
   font-size: 12px;
 
-  color: #fff;
+  color: var(--text-primary);
 
   font-weight: 600;
 
@@ -717,7 +770,7 @@ const goToHome = () => {
 
   font-size: 11px;
 
-  color: var(--secondary);
+  color: var(--text-secondary);
 
 }
 
@@ -760,9 +813,11 @@ const goToHome = () => {
 
   padding: 15px 25px;
 
-  background: var(--bg-card);
+  background: #ffffff;
 
-  border-bottom: 1px solid var(--border-glow);
+  border-bottom: 1px solid rgba(91, 140, 110, 0.12);
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 
 }
 
@@ -801,20 +856,20 @@ const goToHome = () => {
 
   height: 2px;
 
-  background: var(--secondary);
+  background: var(--primary);
 
 }
 
 
 .page-title {
 
-  font-family: 'Orbitron', sans-serif;
+  font-family: var(--font-heading);
 
   font-size: 20px;
 
   font-weight: 600;
 
-  color: #fff;
+  color: var(--text-primary);
 
 }
 
@@ -840,9 +895,9 @@ const goToHome = () => {
 
   padding: 8px 15px;
 
-  background: rgba(0, 0, 0, 0.3);
+  background: #f8f9f5;
 
-  border: 1px solid var(--border-glow);
+  border: 1px solid rgba(91, 140, 110, 0.15);
 
   border-radius: 8px;
 
@@ -871,14 +926,14 @@ const goToHome = () => {
 
   font-size: 13px;
 
-  color: #fff;
+  color: var(--text-primary);
 
 }
 
 
 .system-divider {
 
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(0, 0, 0, 0.2);
 
 }
 
@@ -908,7 +963,7 @@ const goToHome = () => {
 
   bottom: 0;
 
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.3);
 
   z-index: 99;
 
@@ -937,11 +992,11 @@ const goToHome = () => {
 
 .modal-title {
 
-  font-family: 'Orbitron', sans-serif;
+  font-family: var(--font-heading);
 
   font-size: 18px;
 
-  color: var(--secondary);
+  color: var(--primary);
 
 }
 
@@ -952,7 +1007,7 @@ const goToHome = () => {
 
   border: none;
 
-  color: #fff;
+  color: var(--text-secondary);
 
   font-size: 28px;
 
@@ -978,7 +1033,7 @@ const goToHome = () => {
 
   font-size: 13px;
 
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
 
   margin-bottom: 8px;
 
@@ -991,13 +1046,13 @@ const goToHome = () => {
 
   padding: 12px 15px;
 
-  background: rgba(0, 0, 0, 0.3);
+  background: #ffffff;
 
-  border: 1px solid var(--border-glow);
+  border: 1px solid rgba(91, 140, 110, 0.2);
 
   border-radius: 8px;
 
-  color: #fff;
+  color: var(--text-primary);
 
   font-size: 14px;
 
@@ -1021,7 +1076,7 @@ const goToHome = () => {
 
   padding: 14px;
 
-  background: linear-gradient(135deg, var(--secondary), var(--primary));
+  background: linear-gradient(135deg, var(--primary), #4a7a5c);
 
   border: none;
 
@@ -1042,7 +1097,7 @@ const goToHome = () => {
 
 .btn-save:hover {
 
-  box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+  box-shadow: 0 4px 16px rgba(91, 140, 110, 0.35);
 
 }
 

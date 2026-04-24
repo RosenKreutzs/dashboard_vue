@@ -166,12 +166,12 @@ const toggleMode = () => { isLogin.value = !isLogin.value }
   position: relative;
   width: 100%;
   min-height: 100vh;
-  background: #0a0e27;
+  background: var(--bg-dark);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 /* 背景光晕模仿 Dashboard 的配色 */
@@ -184,8 +184,8 @@ const toggleMode = () => { isLogin.value = !isLogin.value }
   z-index: 0;
   opacity: 0.3;
 }
-.blue { top: -100px; left: -100px; background: var(--secondary, #00d4ff); }
-.purple { bottom: -100px; right: -100px; background: #ff3366; }
+.blue { top: -100px; left: -100px; background: var(--secondary, #7ab68a); }
+.purple { bottom: -100px; right: -100px; background: var(--accent, #e8a87c); }
 
 /* 容器 */
 .auth-container {
@@ -199,10 +199,9 @@ const toggleMode = () => { isLogin.value = !isLogin.value }
 /* 玻璃卡片 */
 .auth-card {
   padding: 40px;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(0, 212, 255, 0.2);
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+  background: #ffffff;
+  border: 1px solid rgba(91, 140, 110, 0.15);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   border-radius: 20px;
 }
 
@@ -213,18 +212,16 @@ const toggleMode = () => { isLogin.value = !isLogin.value }
 }
 
 .auth-title {
-  font-family: 'Orbitron', sans-serif;
+  font-family: var(--font-heading);
   font-size: 26px;
   letter-spacing: 2px;
-  background: linear-gradient(135deg, #00d4ff, #00ff9d);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--primary);
   margin-bottom: 10px;
 }
 
 .auth-subtitle {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
 }
 
 /* 输入框组 */
@@ -237,7 +234,7 @@ const toggleMode = () => { isLogin.value = !isLogin.value }
 .input-group label {
   display: block;
   font-size: 11px;
-  color: var(--secondary, #00d4ff);
+  color: var(--primary);
   margin-bottom: 8px;
   font-weight: 600;
   letter-spacing: 1px;
@@ -247,15 +244,15 @@ const toggleMode = () => { isLogin.value = !isLogin.value }
   position: relative;
   display: flex;
   align-items: center;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #f8f9f5;
+  border: 1px solid rgba(91, 140, 110, 0.15);
   border-radius: 8px;
   transition: all 0.3s;
 }
 
 .input-wrapper:focus-within {
-  border-color: var(--secondary, #00d4ff);
-  box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+  border-color: var(--primary);
+  box-shadow: 0 0 10px rgba(91, 140, 110, 0.15);
 }
 
 .input-icon {
@@ -269,12 +266,12 @@ const toggleMode = () => { isLogin.value = !isLogin.value }
   padding: 12px 15px;
   background: transparent;
   border: none;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 14px;
 }
 
 .input-wrapper input::placeholder {
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(0, 0, 0, 0.3);
 }
 
 /* 选项 */
@@ -283,11 +280,11 @@ const toggleMode = () => { isLogin.value = !isLogin.value }
   justify-content: space-between;
   align-items: center;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
 }
 
 .forgot-link {
-  color: var(--secondary, #00d4ff);
+  color: var(--primary);
   text-decoration: none;
 }
 
@@ -298,7 +295,7 @@ const toggleMode = () => { isLogin.value = !isLogin.value }
   padding: 14px;
   border-radius: 8px;
   border: none;
-  font-family: 'Orbitron', sans-serif;
+  font-family: var(--font-heading);
   font-size: 14px;
   font-weight: 700;
   color: #fff;
@@ -308,13 +305,13 @@ const toggleMode = () => { isLogin.value = !isLogin.value }
 }
 
 .btn-auth.login {
-  background: linear-gradient(135deg, #00d4ff, #0066ff);
-  box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+  background: linear-gradient(135deg, #5b8c6e, #4a7a5c);
+  box-shadow: 0 5px 15px rgba(91, 140, 110, 0.25);
 }
 
 .btn-auth.register {
-  background: linear-gradient(135deg, #00ff9d, #00cc7a);
-  box-shadow: 0 5px 15px rgba(0, 255, 157, 0.3);
+  background: linear-gradient(135deg, #7ab68a, #5b8c6e);
+  box-shadow: 0 5px 15px rgba(91, 140, 110, 0.25);
 }
 
 .btn-auth:hover {
@@ -350,15 +347,15 @@ const toggleMode = () => { isLogin.value = !isLogin.value }
 
 .auth-footer p {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--text-secondary);
   margin-bottom: 10px;
 }
 
 .btn-toggle {
   background: none;
   border: none;
-  color: var(--secondary, #00d4ff);
-  font-family: 'Orbitron', sans-serif;
+  color: var(--primary);
+  font-family: var(--font-heading);
   font-size: 12px;
   cursor: pointer;
   text-decoration: underline;
